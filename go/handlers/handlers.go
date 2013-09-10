@@ -5,7 +5,15 @@ import (
 	"net/http"
 	"appserver"
 	"appserver/config"
+	"encoding/json"
 )
+
+type AngryCat struct {
+	Id int `json:"id"`
+	Name string `json:"name"`
+	Image_path string `json:"image_path"`
+	Rank int `json:"rank"`
+}
 
 type MyHandlers struct {} // implements appserver/handlers/handlers
 
@@ -44,10 +52,16 @@ func makeJsonHandler( fn func(w http.ResponseWriter, r *http.Request) ) http.Han
 }
 
 func angryCatsHandler( w http.ResponseWriter, r *http.Request ) {
-	w.Write([]byte(`[
-{"id":1, "name": "Wet Cat", "image_path": "assets/images/cat2.jpg", "rank":1 }, 
-{"id":2, "name": "Bitey Cat","image_path": "assets/images/cat1.jpg","rank":2 },
-{"id":3, "name": "Surprised Cat", "image_path": "assets/images/cat3.jpg", "rank":3 }]`))
+	angryCats := make([]AngryCat,0)
+	angryCats = append(angryCats,AngryCat{1, "Wet Cat", "assets/images/cat2.jpg", 1 })
+	angryCats = append(angryCats,AngryCat{2, "Bitey Cat", "assets/images/cat1.jpg",2 })
+	angryCats = append(angryCats,AngryCat{3, "Surprised Cat", "assets/images/cat3.jpg", 3 })
+
+	b, err := json.Marshal(angryCats)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	w.Write( b )
 }
 
 func angryCatHandler( w http.ResponseWriter, r *http.Request ) {
