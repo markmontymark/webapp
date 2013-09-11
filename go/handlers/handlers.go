@@ -39,7 +39,7 @@ func (this *MyHandlers) Load ( cfg *config.Config ) {
 	http.HandleFunc( "/update/", updateHandler )	
 	http.HandleFunc( "/delete/", deleteHandler )	
 	http.HandleFunc( "/AngryCats", makeJsonHandler(angryCatsHandler) )
-	http.HandleFunc( "/AngryCat", makeJsonHandler(angryCatHandler) )
+	http.HandleFunc( "/AngryCats/", makeJsonHandler(angryCatsHandler) )
 }
 
 
@@ -52,6 +52,10 @@ func makeJsonHandler( fn func(w http.ResponseWriter, r *http.Request) ) http.Han
 }
 
 func angryCatsHandler( w http.ResponseWriter, r *http.Request ) {
+	if len(r.URL.Path) > len("/AngryCats/") {
+		angryCatHandler( w , r )
+		return
+	}
 	angryCats := make([]AngryCat,0)
 	angryCats = append(angryCats,AngryCat{1, "Wet Cat", "assets/images/cat2.jpg", 1 })
 	angryCats = append(angryCats,AngryCat{2, "Bitey Cat", "assets/images/cat1.jpg",2 })
@@ -60,24 +64,23 @@ func angryCatsHandler( w http.ResponseWriter, r *http.Request ) {
 	b, err := json.Marshal(angryCats)
 	if err != nil {
 		fmt.Println("error:", err)
+		return
 	}
 	w.Write( b )
 }
 
 func angryCatHandler( w http.ResponseWriter, r *http.Request ) {
-	w.Header().Add("content-type","application/json; charset=utf-8")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-	w.Write([]byte(`[
-{"id":1, "name": "Wet Cat", "image_path": "assets/images/cat2.jpg", "rank":1 }, 
-{"id":2, "name": "Bitey Cat","image_path": "assets/images/cat1.jpg","rank":2 },
-{"id":3, "name": "Surprised Cat", "image_path": "assets/images/cat3.jpg", "rank":3 }]`))
+	/*
+	var angryCat []AngryCat
+	err := json.Unmarshal(r., &angryCat)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	*/
+	fmt.Printf("path %v\n",  r.URL.Path)
+	//fmt.Printf("form data %v\n",  r.Form.Encode())
+	w.Write([]byte("[]") )
 }
-
-
-//new AngryCat({ name: 'Wet Cat', image_path: 'assets/images/cat2.jpg' }),
-      //new AngryCat({ name: 'Bitey Cat', image_path: 'assets/images/cat1.jpg' }),
-      //new AngryCat({ name: 'Surprised Cat', image_path: 'assets/images/cat3.jpg' })
-	
 
 
 func badInputHandler(w http.ResponseWriter, r *http.Request, msgs []string) {

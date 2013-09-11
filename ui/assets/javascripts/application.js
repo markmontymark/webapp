@@ -9,23 +9,24 @@ http://davidsulc.github.com/backbone.marionette-collection-example/
 
 MyApp = new Backbone.Marionette.Application();
 
+var CustomLayout = Backbone.Marionette.Layout.extend({
+	onRender: function () {
+      // get rid of that pesky wrapping-div
+      // assumes 1 child element.
+      this.$el = this.$el.children();
+      this.setElement(this.$el);
+	}
+});
+
 MyApp.addRegions({
   mainRegion: "#content"
 });
 
 AngryCat = Backbone.Model.extend({
 
-  url: "http://127.0.1.1:2345/AngryCat",
-
-	//parse: function(response){
-		//console.log("in angry cat parse")
-		//console.log("angry cat response was " + response );
-       //return response;
-    //},
-  
-
   defaults: {
-    votes: 0
+    votes: 0,
+	 id: 0
   },
   
   addVote: function(){
@@ -49,13 +50,6 @@ AngryCats = Backbone.Collection.extend({
   model: AngryCat,
   url: "http://127.0.1.1:2345/AngryCats",
 
-
-	//parse: function(response){
-		//console.log("in angry cats parse")
-		//console.log("angry cats response was " + response );
-       //return response;
-    //},
-  
   initialize: function(cats){
     var rank = 1;
     _.each(cats, function(cat) {
@@ -128,6 +122,7 @@ AngryCats = Backbone.Collection.extend({
   }
 });
 
+// no worky worky AngryCatView = CustomLayout.extend({
 AngryCatView = Backbone.Marionette.ItemView.extend({
   template: "#angry_cat-template",
   tagName: 'tr',
@@ -183,11 +178,7 @@ MyApp.addInitializer(function(options){
 });
 
 $(document).ready(function(){
-  var cats = new AngryCats([
-      //new AngryCat({ name: 'Wet Cat', image_path: 'assets/images/cat2.jpg' }),
-      //new AngryCat({ name: 'Bitey Cat', image_path: 'assets/images/cat1.jpg' }),
-      //new AngryCat({ name: 'Surprised Cat', image_path: 'assets/images/cat3.jpg' })
-  ]);
+  var cats = new AngryCats([ ]);
 	cats.fetch( {
 		success: function(collection, response,options) {
 			console.log("success got collection, response, options ", collection, response, options)
@@ -199,7 +190,7 @@ $(document).ready(function(){
 		},
 		error: function(collection,response,options) {
 			console.log("error got collection ", collection )
-			console.log("error got response ",  response, options)
+			console.log("error got response ",  response )
 			console.log("error got options ",  options)
 		},
 
@@ -207,13 +198,7 @@ $(document).ready(function(){
 			console.log("complete handler, xhr " + xhr +", textStatus " + textStatus +", err "+ errorThrown);
 		}
 	});
-	
 
   MyApp.start({cats: cats});
   
-  //cats.add(new AngryCat({
-    //name: 'Cranky Cat',
-    //image_path: 'assets/images/cat4.jpg',
-    //rank: cats.size() + 1
-  //}));
 });
