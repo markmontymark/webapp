@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"code.google.com/p/gorest"
+
+	"strings"
 )
 
 
@@ -56,8 +58,10 @@ type OrderService struct{
 
     discover 	 gorest.EndPoint `method:"GET"  path:"/discover/"      output:"Discover"`
     userDetails gorest.EndPoint `method:"GET"  path:"/users/{Id:int}" output:"User"`
+    listUsers   gorest.EndPoint `method:"GET"  path:"/users/"         output:"[]User"`
     listItems   gorest.EndPoint `method:"GET"  path:"/items/"         output:"[]Item"`
-    addItem     gorest.EndPoint `method:"POST" path:"/items/"         postdata:"Item"`
+    addItem     gorest.EndPoint `method:"POST" path:"/item/"         postdata:"Item"`
+    addItems    gorest.EndPoint `method:"POST" path:"/items/"         postdata:"[]Item"`
 
     //On a real app for placeOrder below, the POST URL would probably be just /orders/, this is just to
     // demo the ability of mixing post-data parameters with URL mapped parameters.
@@ -85,6 +89,15 @@ func(serv OrderService) UserDetails(Id int) (u User){
     return
 }
 
+func(serv OrderService) ListUsers()[]User{
+    serv.ResponseBuilder().CacheMaxAge(60*60*24) //List cacheable for a day. More work to come on this, Etag, etc
+	retval := make([]User,0)
+	for _,v := range userStore {
+		retval = append(retval,v)
+	}
+    return retval
+}
+
 func(serv OrderService) ListItems()[]Item{
     serv.ResponseBuilder().CacheMaxAge(60*60*24) //List cacheable for a day. More work to come on this, Etag, etc
     return itemStore
@@ -95,21 +108,34 @@ func(serv OrderService) ListOrders()[]Order{
     return orderStore
 }
 
-func(serv OrderService) AddItem(i Item){
+func(serv OrderService) _AddItem(i Item) Item {
 
     for _,item:=range itemStore{
         if item.Id == i.Id{
             item=i
-            serv.ResponseBuilder().SetResponseCode(200) //Updated http 200, or you could just return without setting this. 200 is the default for POST
-            return
+            //serv.ResponseBuilder().SetResponseCode(200) //Updated http 200, or you could just return without setting this. 200 is the default for POST
+            return item
         }
     }
 
     //Item Id not in database, so create new
     i.Id = len(itemStore)
     itemStore=append(itemStore,i)
+    return i
+}
 
-    serv.ResponseBuilder().Created("http://localhost:8787/orders-service/items/"+string(i.Id)) //Created, http 201
+func(serv OrderService) AddItem(i Item){
+    itemAdded := serv._AddItem(i)
+    serv.ResponseBuilder().Created("http://localhost:8787/orders-service/items/"+string(itemAdded.Id)) //Created, http 201
+}
+
+func(serv OrderService) AddItems(items []Item){
+	idsAdded := make([]string,0)
+	for _,item := range items {
+		idsAdded = append( idsAdded, string( serv._AddItem( item ).Id) )
+	}
+	
+   serv.ResponseBuilder().Created("http://localhost:8787/orders-service/items/"+strings.Join( idsAdded, ",") ) //Created, http 201
 }
 
 func findItem( itemId int ) (Item,bool) {
@@ -170,15 +196,15 @@ func(serv OrderService) DeleteOrder(id int) {
 }
 
 func init () {
-	itemStore = append(itemStore,Item{0 , 10})
-	itemStore = append(itemStore,Item{1 , 22})
-	itemStore = append(itemStore,Item{2 , 33})
-	itemStore = append(itemStore,Item{3 , 40})
+	//itemStore = append(itemStore,Item{0 , 10})
+	//itemStore = append(itemStore,Item{1 , 22})
+	//itemStore = append(itemStore,Item{2 , 33})
+	//itemStore = append(itemStore,Item{3 , 40})
 
 	userStore = make(map[int]User)
-	userStore[0] = User{0,[]int{1}}
-	userStore[1] = User{1,[]int{2}}
-	userStore[2] = User{2,[]int{3}}
-	orderStore = append(orderStore,Order{1,0,2,5.00,1.00,false})
+	//userStore[0] = User{0,[]int{1}}
+	//userStore[1] = User{1,[]int{2}}
+	//userStore[2] = User{2,[]int{3}}
+	//orderStore = append(orderStore,Order{1,0,2,5.00,1.00,false})
 
 }
