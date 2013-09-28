@@ -1,0 +1,11 @@
+#!/bin/sh
+
+export LD_LIBRARY_PATH=$HOME/.gvm/pkgsets/go1.1.2/global/overlay/lib:
+export PATH=$HOME/.gvm/bin:$HOME/.gvm/pkgsets/go1.1.2/global/bin:$HOME/.gvm/gos/go1.1.2/bin:$HOME/.gvm/pkgsets/go1.1.2/global/overlay/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export DYLD_LIBRARY_PATH=$HOME/.gvm/pkgsets/go1.1.2/global/overlay/lib:
+export GVM_OVERLAY_PREFIX=$HOME/.gvm/pkgsets/go1.1.2/global/overlay
+export GOPATH=$HOME/.gvm/pkgsets/go1.1.2/global:$HOME/go-workspace
+export PKG_CONFIG_PATH=$HOME/.gvm/pkgsets/go1.1.2/global/overlay/lib/pkgconfig:
+export GVM_PATH_BACKUP=$HOME/.gvm/bin:$HOME/.gvm/pkgsets/go1.1.2/global/bin:$HOME/.gvm/gos/go1.1.2/bin:$HOME/.gvm/pkgsets/go1.1.2/global/overlay/bin:$HOME/.alternatives:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+
