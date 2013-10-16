@@ -8,6 +8,10 @@ use TestUrl;
 use DoneTesting;
 use JSON::XS;
 
+use Go::FindTypes;
+use Go::Gorest::FindEndpoints;
+
+
 my $tasks = [
 	GET->new( 
 		url => 'http://localhost:8787/orders-service/items' ),
